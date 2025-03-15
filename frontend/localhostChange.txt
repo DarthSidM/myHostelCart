@@ -1,0 +1,4 @@
+home.jsx : get-my-items, get-other-items
+sidebar.jsx: images call
+additemsmodal.jsx: add-items
+
