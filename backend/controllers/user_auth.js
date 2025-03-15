@@ -105,7 +105,7 @@ exports.login = async (req, res) => {
         });
       }
   
-      // Find the user by email
+      // Find the user by phone number
       const existingUser = await User.findOne({ phoneNumber });
       
       if(!existingUser){
@@ -154,8 +154,8 @@ exports.login = async (req, res) => {
         role: 'user',
       }
   
-      res.cookie('jwt', token, {
-        httpOnly: true,
+      res.cookie('jwt', token, { // "name of cookie", "value of cookie", "options"
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         maxAge: (JWT_EXPIRE * 24 * 60 * 60 * 1000) || 3600000,
       });
