@@ -4,11 +4,12 @@ const Category = require("../models/categories"); // during deletion and updatio
 
 
 exports.createItem = async (req,res) => {
-    try{
-        const { userId, itemName, itemDescription,itemPrice, itemCategory } = req.body;
+    try {
+        const { userId, itemName, itemDescription, itemPrice, itemCategory } = req.body;
+        const images = req.files ? req.files.map(file => `uploads/${file.filename}`) : []; // Store image paths
 
-        if (!userId || !itemName || !itemPrice || !itemCategory) {
-            return res.status(400).json({ message: "All fields are required" });
+        if (!userId || !itemName || !itemPrice || !itemCategory || images.length === 0) {
+            return res.status(400).json({ message: "All fields and at least one image are required" });
         }
 
         const user = await User.findById(userId);
@@ -16,22 +17,26 @@ exports.createItem = async (req,res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const category = await Category.findOne({categoryName: itemCategory}); // here i have to do {categoryName: itemCategory} because if i had directly written categoryName instead of itemCategory then simple {categoryName} would have sufficed
+        const category = await Category.findOne({ categoryName: itemCategory });
+        if (!category) {
+            return res.status(404).json({ message: "Category not found" });
+        }
 
         const newItem = {
             itemName,
-            itemDescription: itemDescription || "", // Default to an empty string if not provided
+            itemDescription: itemDescription || "",
             itemPrice,
-            itemCategory:category._id,
+            itemCategory: category._id,
+            itemPictures:images // Store image paths
         };
 
         user.item.push(newItem);
         await user.save();
         const createdItem = user.item[user.item.length - 1]; // The last added item
+
         return res.status(201).json({ message: "Item created successfully", item: createdItem });
 
-
-    }catch(error){
+    } catch (error) {
         console.error("Error creating item:", error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
@@ -40,8 +45,8 @@ exports.createItem = async (req,res) => {
 // user id will be sent from the frontend
 exports.getUserItems = async (req,res) =>{
     try{
-        const {userId} = req.body;
-
+        const {userId} = req.query;
+        
         const user = await User.findById(userId);
         if(!user){
             return res.status(404).json({
@@ -69,29 +74,33 @@ exports.getUserItems = async (req,res) =>{
 }
 
 // college id and search query will be sent from the frontend
-exports.getItemsBySearch = async (req,res) =>{
-    try{
-        const { collegeId, searchQuery } = req.body;
+exports.getOtherItems = async (req,res) =>{
+    try {
+        const { collegeId,userId } = req.query;
 
         if (!collegeId) {
             return res.status(400).json({ message: "College ID is required", success: false });
         }
 
-        const users = await User.find({ college: collegeId }); 
+        // Fetch users belonging to the specified college
+        const users = await User.find({ college: collegeId, _id: { $ne: userId } });
 
         if (users.length === 0) {
             return res.status(404).json({ message: "No users found for this college", success: false });
         }
 
-        // Filter items based on the search query
+        // Collect items along with seller info
         let items = [];
         users.forEach(user => {
             user.item.forEach(item => {
-                if (!searchQuery || 
-                    item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                    item.itemDescription.toLowerCase().includes(searchQuery.toLowerCase())) {
-                    items.push(item);
-                }
+                items.push({
+                    ...item.toObject(), // Convert Mongoose subdocument to plain object
+                    seller: {
+                        fullName: user.fullName,
+                        phoneNumber: user.phoneNumber,
+                        profile_photo_url: user.profile_photo_url,
+                    }
+                });
             });
         });
 
@@ -101,7 +110,7 @@ exports.getItemsBySearch = async (req,res) =>{
             items: items,
         });
 
-    }catch(error){
+    } catch (error) {
         console.error("Error fetching user items:", error);
         res.status(500).json({
             message: "Server error",
@@ -152,10 +161,11 @@ exports.getItemsByCategory = async (req,res) =>{
 }
 
 // user id and item id will be sent from the frontend
+// updated images will be sent from the frontend
 exports.updateItem = async (req, res) => {
     try {
-        const { userId, itemId, itemName, itemDescription, itemPrice, itemCategory } = req.body;
-
+        const { userId, itemId, itemName, itemDescription, itemPrice, deletedImages } = req.body;
+        
         if (!userId || !itemId) {
             return res.status(400).json({ message: "User ID and Item ID are required", success: false });
         }
@@ -171,18 +181,32 @@ exports.updateItem = async (req, res) => {
             return res.status(404).json({ message: "Item not found", success: false });
         }
 
-        // Update the item fields (check if new values are provided, otherwise retain existing ones)
-        user.item[itemIndex].itemName = itemName || user.item[itemIndex].itemName;
-        user.item[itemIndex].itemDescription = itemDescription || user.item[itemIndex].itemDescription;
-        user.item[itemIndex].itemPrice = itemPrice || user.item[itemIndex].itemPrice;
-        user.item[itemIndex].itemCategory = itemCategory || user.item[itemIndex].itemCategory;
+        const item = user.item[itemIndex];
+
+        // Update text fields if provided
+        if (itemName) item.itemName = itemName;
+        if (itemDescription) item.itemDescription = itemDescription;
+        if (itemPrice) item.itemPrice = itemPrice;
+        // if (itemCategory) item.itemCategory = itemCategory;
+
+        // Handle new images (append to existing images)
+        if (req.files && req.files.length > 0) {
+            const updatedImages = req.files.map(file => `uploads/${file.filename}`);
+            item.itemPictures = [...item.itemPictures, ...updatedImages];
+        }
+
+        // Handle image deletion (if deletedImages array is provided)
+        if (deletedImages) {
+            const imagesToDelete = Array.isArray(deletedImages) ? deletedImages : [deletedImages];
+            item.itemPictures = item.itemPictures.filter(img => !imagesToDelete.includes(img));
+        }
 
         await user.save();
 
         return res.status(200).json({
             message: "Item updated successfully",
             success: true,
-            item: user.item[itemIndex],
+            item
         });
 
     } catch (error) {
@@ -190,10 +214,12 @@ exports.updateItem = async (req, res) => {
         res.status(500).json({
             message: "Server error",
             success: false,
-            error: error.message,
+            error: error.message
         });
     }
+
 };
+
 
 // user id and item id will be sent from the frontend
 exports.deleteItem = async (req, res) => {

@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
-
-
+const cors = require("cors");
+const path = require("path");
 
 
 
@@ -14,11 +14,19 @@ const admin = require("./routes/admin");
 const category = require("./routes/categoryRoute");
 const college = require("./routes/collegeRoute");
 
-app.use(express.json());
+// app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-
-
+// Prevent JSON parsing for GET requests
+app.use((req, res, next) => {
+    if (req.method !== "GET") {
+        express.json()(req, res, next);
+    } else {
+        next();
+    }
+});
 
 // Routes
 app.use("/api/v1/user", user);
