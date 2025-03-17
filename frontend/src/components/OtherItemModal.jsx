@@ -1,67 +1,3 @@
-// "use client"
-
-// import { Phone, User } from "lucide-react"
-// import { Button } from "./ui/button"
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
-
-// export function OtherItemModal({ isOpen, onClose, item}) {
-//   if (!item) return null;
-//   const seller = item.seller || {}; // Ensure seller exists
-
-//   return (
-//     <Dialog open={isOpen} onOpenChange={onClose}>
-//       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto bg-white">
-//         <DialogHeader>
-//           <DialogTitle>{item.itemName}</DialogTitle>
-//         </DialogHeader>
-
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-//           <div>
-//             <img
-//               src={`http://localhost:3000/${item.itemPictures[0]}` || "/placeholder.svg"}
-//               alt={item.itemName}
-//               className="w-full aspect-square object-cover rounded-lg"
-//             />
-//             <div className="grid grid-cols-3 gap-2 mt-2">
-//               {item.itemPictures?.slice(1).map((image, index) => (
-//                 <img
-//                   key={index}
-//                   src={image ? `http://localhost:3000/${image}` : "/placeholder.svg"}
-//                   alt={`${item.itemName} ${index + 2}`}
-//                   className="w-full h-20 object-cover rounded-md"
-//                 />
-//               ))}
-//             </div>
-//           </div>
-//           <div>
-//             <h2 className="text-2xl font-bold mb-2">{item.itemName}</h2>
-//             <p className="text-xl font-semibold mb-4">${item.itemPrice?.toFixed(2)}</p>
-//             <p className="text-muted-foreground mb-6">{item.itemDescription}</p>
-
-//             <div className="space-y-4">
-//               <div className="bg-muted p-4 rounded-lg">
-//                 <h3 className="font-semibold mb-2">Seller Information</h3>
-//                 <div className="space-y-2">
-//                   <div className="flex items-center gap-2">
-//                     <User className="h-4 w-4 text-muted-foreground" />
-//                     <span>{seller?.fullName || "Unknown Seller"}</span>
-//                   </div>
-//                   <div className="flex items-center gap-2">
-//                     <Phone className="h-4 w-4 text-muted-foreground" />
-//                     <span>{seller?.phoneNumber || "N/A"}</span>
-//                   </div>
-//                 </div>
-//               </div>
-//               <Button className="w-full">Contact Seller</Button>
-//             </div>
-//           </div>
-//         </div>
-//       </DialogContent>
-//     </Dialog>
-//   )
-// }
-
-
 "use client";
 
 import { Phone, User } from "lucide-react";
@@ -83,7 +19,7 @@ export function OtherItemModal({ isOpen, onClose, item }) {
           {/* Item Images */}
           <div>
             <img
-              src={item.itemPictures?.[0] ? `http://localhost:3000/${item.itemPictures[0]}` : "/placeholder.svg"}
+              src={item.itemPictures?.[0] ? item.itemPictures[0] : "/placeholder.svg"}
               alt={item.itemName}
               className="w-full aspect-square object-cover rounded-lg border border-gray-200 shadow-sm"
             />
@@ -91,7 +27,7 @@ export function OtherItemModal({ isOpen, onClose, item }) {
               {item.itemPictures?.slice(1).map((image, index) => (
                 <img
                   key={index}
-                  src={image ? `http://localhost:3000/${image}` : "/placeholder.svg"}
+                  src={image ? image : "/placeholder.svg"}
                   alt={`${item.itemName} ${index + 2}`}
                   className="w-full h-20 object-cover rounded-md border border-gray-200 shadow-sm"
                 />

@@ -141,7 +141,7 @@ export function MyItemModal({ isOpen, onClose, item, onUpdateItem, onDeleteItem 
               {/* Main Image with Delete Button */}
               <div className="relative">
                 <img
-                  src={item.itemPictures[0] ? `http://localhost:3000/${item.itemPictures[0]}` : "/placeholder.svg"}
+                  src={item.itemPictures[0] ? item.itemPictures[0] : "/placeholder.svg"}
                   alt={item.itemName}
                   className="w-full aspect-square object-cover rounded-lg"
                 />
@@ -160,7 +160,7 @@ export function MyItemModal({ isOpen, onClose, item, onUpdateItem, onDeleteItem 
                 {item.itemPictures.slice(1).map((image, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={image ? `http://localhost:3000/${image}` : "/placeholder.svg"}
+                      src={image ? image : "/placeholder.svg"}
                       alt={`${item.itemName} ${index + 2}`}
                       className="w-full h-20 object-cover rounded-md"
                     />

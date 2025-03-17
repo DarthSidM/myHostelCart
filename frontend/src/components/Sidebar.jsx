@@ -18,9 +18,10 @@ export function Sidebar({ items, onSelectItem, selectedItemId, onAddItem }) {
           {/* Items List */}
           <div className="space-y-4">
             {(items || []).map((item) => {
+              console.log(item.itemPictures);
               const imageUrl =
                 (item.itemPictures || []).length > 0
-                  ? `http://localhost:3000/${item.itemPictures[0]}`
+                  ? item.itemPictures[0]
                   : "/placeholder.svg"; // Default image
 
               return (

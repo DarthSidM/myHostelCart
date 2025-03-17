@@ -53,7 +53,7 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
               >
                 <div className="relative overflow-hidden rounded-t-lg">
                   <img
-                    src={buyItem.itemPictures?.[0] ? `http://localhost:3000/${buyItem.itemPictures[0]}` : "/placeholder.svg"}
+                    src={buyItem.itemPictures?.[0] ? buyItem.itemPictures[0] : "/placeholder.svg"}
                     alt={buyItem.itemName}
                     className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
                   />
