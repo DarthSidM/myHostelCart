@@ -10,15 +10,19 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const uploadImage = async (file) => {
-  try {
-    const result = await cloudinary.uploader.upload(file);
-    console.log("file uploaded!");
-    return result;
-  } catch (error) {
-    console.error("Cloudinary upload error:", error);
-    throw error;
-  }
+const uploadImage = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream({}, (error, result) => {
+          if (error) {
+              console.error("Cloudinary upload error:", error);
+              reject(error);
+          } else {
+              console.log("uploaded image")
+              resolve(result);
+          }
+      });
+      stream.end(fileBuffer);
+  });
 };
 const deleteFile = async (imageUrl) => {
   try {
