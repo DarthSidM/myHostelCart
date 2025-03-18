@@ -23,7 +23,7 @@ exports.createItem = async (req,res) => {
         }
 
         // Upload all images to Cloudinary and get URLs
-        const imageUploadPromises = req.files.map(file => uploadImage(file.path)); // Upload each image
+        const imageUploadPromises = req.files.map(file => uploadImage(file.buffer)); // Upload each image
         const uploadedImageUrls = await Promise.all(imageUploadPromises); // Wait for all uploads to complete
         const formattedPictures = uploadedImageUrls.map(img => img.secure_url);
         const newItem = {
@@ -196,7 +196,7 @@ exports.updateItem = async (req, res) => {
 
         // Upload new images to Cloudinary
         if (req.files && req.files.length > 0) {
-            const imageUploadPromises = req.files.map(file => uploadImage(file.path));
+            const imageUploadPromises = req.files.map(file => uploadImage(file.buffer));
             const uploadedImageUrls = await Promise.all(imageUploadPromises);
             const formattedPictures = uploadedImageUrls.map(img => img.secure_url);
 
