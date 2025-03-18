@@ -12,7 +12,7 @@ export function OtherItemModal({ isOpen, onClose, item }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto bg-white border border-gray-300 rounded-lg shadow-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">{item.itemName}</DialogTitle>
+          {/* <DialogTitle className="text-xl font-semibold">{item.itemName}</DialogTitle> */}
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">

@@ -108,7 +108,8 @@ const Home = () => {
             <AddItemModal
                 isOpen={isAddItemModalOpen}
                 onClose={() => setIsAddItemModalOpen(false)}
-                onAddItem={handleAddItem}
+                // onAddItem={handleAddItem}
+                onItemAdded={handleAddItem}
             />
             {isCurrentUserItem ? (
                 <MyItemModal
