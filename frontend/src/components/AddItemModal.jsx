@@ -6,6 +6,7 @@ import { Textarea } from "./ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog";
 import { X } from "lucide-react";
 import getDecodedToken from "../lib/auth";
+import api from "../middleware/interceptor";
 
 export function AddItemModal({ isOpen, onClose,onItemAdded }) {
   const [name, setName] = useState("");
@@ -28,7 +29,7 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:3000/api/v1/category");
+      const response = await api.get("/category");
       setCategories(response.data.data || []);
     } catch (err) {
       setError("Failed to fetch categories");
@@ -51,7 +52,7 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
       formData.append("itemCategory", category);
       images.forEach((image) => formData.append("images", image));
 
-      const response = await axios.post("http://localhost:3000/api/v1/user/add-items", formData, {
+      const response = await api.post("/user/add-items", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

@@ -130,7 +130,7 @@ export function MyItemModal({ isOpen, onClose, item, onUpdateItem, onDeleteItem 
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto bg-white">
+        <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-auto bg-white">
           <DialogHeader>
             <DialogTitle>{isEditing ? "Edit Item" : item.itemName}</DialogTitle>
           </DialogHeader>

@@ -23,8 +23,9 @@ const Home = () => {
             setCurrentUser({
                 userId: decodedUser.userId,
                 name: decodedUser.fullName,
-                profilePic: decodedUser.profilePhoto || "/placeholder.svg?height=32&width=32",
+                // profilePic: decodedUser.profilePhoto || "/placeholder.svg?height=32&width=32",
                 college: decodedUser.college,
+                phoneNumber: decodedUser.phoneNumber,
             });
         }
     }, []);
@@ -89,7 +90,7 @@ const Home = () => {
 
     return (
         <div>
-            <Navbar userName={currentUser?.name} userProfilePic={currentUser?.profilePic} />
+            <Navbar userName={currentUser?.name} userPhone={currentUser?.phoneNumber} />
             <div className="flex flex-1 overflow-hidden">
                 <Sidebar
                     items={userItems}
