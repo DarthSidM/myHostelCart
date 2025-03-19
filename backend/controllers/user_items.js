@@ -169,6 +169,7 @@ exports.getItemsByCategory = async (req,res) =>{
 // user id and item id will be sent from the frontend
 // updated images will be sent from the frontend
 exports.updateItem = async (req, res) => {
+    console.log("update item endpoint hit")
     try {
         const { userId, itemId, itemName, itemDescription, itemPrice, deletedImages } = req.body;
 
@@ -230,7 +231,7 @@ exports.updateItem = async (req, res) => {
             error: error.message
         });
     }
-
+    console.log("item updated");
 };
 
 

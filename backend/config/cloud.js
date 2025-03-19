@@ -47,4 +47,4 @@ const getPublicIdFromUrl = (url) => {
       return null;
   }
 };
-export { uploadImage,deleteFile }; // ✅ Correct ES Module export
+export { uploadImage,deleteFile }; 
