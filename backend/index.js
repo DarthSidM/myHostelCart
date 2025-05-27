@@ -13,6 +13,7 @@ const user = require("./routes/user");
 const admin = require("./routes/admin");
 const category = require("./routes/categoryRoute");
 const college = require("./routes/collegeRoute");
+const chatMessage = require("./routes/chatMessage");
 
 // app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -33,7 +34,7 @@ app.use("/api/v1/user", user);
 app.use("/api/v1/admin", admin);
 app.use("/api/v1/category",category);
 app.use("/api/v1/college",college);
-
+app.use("/api/v1/chat", chatMessage);
 
 
 
