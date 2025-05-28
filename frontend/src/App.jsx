@@ -8,6 +8,7 @@ import Signup from "./pages/Signup";
 import ProtectedRoute from "./middleware/ProtectedRoute";
 import PublicRoute from "./middleware/PublicRoute";
 import Logout from "./pages/Logout";
+import Chat from "./pages/Chat";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/about" element={<><Navbar /><About /></>} />
             <Route path="/contact" element={<><Navbar /><Contact /></>} />
             <Route path="/logout" element={<Logout />} />
+            <Route path="/chat" element={<><Navbar /><Chat /></>} />
           </Route>
 
           {/* Public Routes: Only accessible when NOT logged in */}
