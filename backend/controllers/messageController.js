@@ -5,7 +5,7 @@ const Chat = require("../models/chat");
 exports.getAllMessages = async (req, res) => {
   try {
     const chatId = req.params.chatId;
-
+    console.log("getAllMessages called with chatId:", chatId);
     // Optional: Check if chat exists
     const chatExists = await Chat.exists({ _id: chatId });
     if (!chatExists) {

@@ -23,6 +23,7 @@ exports.accessChat = async (req, res) => {
 
     let chat = await Chat.findOne({
       users: { $all: [currentUser._id, receivingUser._id] },
+      $expr: { $eq: [ { $size: "$users" }, 2 ] }
     })
       .populate("users", "-password")
       .populate("latestMessage");

@@ -19,7 +19,7 @@ const chatSchema = new mongoose.Schema(
 );
 
 // Ensure only one chat exists between any two users
-chatSchema.index({ users: 1 }, { unique: true });
+chatSchema.index({ users: 1 }, { unique: false });
 
 const chat = mongoose.model("chat", chatSchema);
 module.exports = chat;
