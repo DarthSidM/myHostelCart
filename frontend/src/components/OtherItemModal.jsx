@@ -8,11 +8,41 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import getDecodedToken from "../lib/auth";
+import api from "../middleware/interceptor";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+
 
 export function OtherItemModal({ isOpen, onClose, item }) {
   if (!item) return null;
   const seller = item.seller || {};
   const images = item.itemPictures?.length ? item.itemPictures : ["/placeholder.svg"];
+
+  const decodedUser = getDecodedToken();
+  const decodedUserPhoneNumber = decodedUser?.phoneNumber;
+
+  const navigate = useNavigate();
+
+  async function handleContactSeller() {
+    if (!decodedUserPhoneNumber || !seller.phoneNumber) {
+      alert("Missing user or seller phone number.");
+      return;
+    }
+
+    try {
+      const { data } = await api.get(
+        `/chat/access-chat?phoneNumberCurrentUser=${decodedUserPhoneNumber}&phoneNumberOfReceivingUser=${seller.phoneNumber}`
+      );
+
+      // On success, redirect to /chat
+      navigate("/chat");
+    } catch (error) {
+      console.error("Failed to access chat:", error);
+      alert("Unable to open chat with seller. Please try again later.");
+    }
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -58,9 +88,9 @@ export function OtherItemModal({ isOpen, onClose, item }) {
               <p className="text-xl font-semibold text-green-600 mb-4">
                 ₹{item.itemPrice?.toLocaleString("en-IN")}
               </p>
-              <p className="text-muted-foreground mb-6 whitespace-pre-line break-words">
-                {item.itemDescription}
-              </p>
+              <div className=" rounded-xl p-4 border max-h-48 overflow-y-auto">
+                <p className="text-gray-700 whitespace-pre-line break-words">{item.itemDescription}</p>
+              </div>
             </div>
 
             {/* Seller Info */}
@@ -79,7 +109,7 @@ export function OtherItemModal({ isOpen, onClose, item }) {
             </div>
 
             {/* Contact Seller Button */}
-            <Button className="w-full mt-4 bg-black text-white hover:bg-gray-800">
+            <Button className="w-full mt-4 bg-black text-white hover:bg-gray-800" onClick={handleContactSeller}>
               Contact Seller
             </Button>
           </div>

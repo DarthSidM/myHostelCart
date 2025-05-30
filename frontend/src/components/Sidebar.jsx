@@ -43,7 +43,7 @@ export function Sidebar({ items, onSelectItem, selectedItemId, onAddItem }) {
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold text-gray-900 truncate">{item.itemName}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-2">{item.itemDescription}</p>
+                    {/* <p className="text-sm text-gray-600 line-clamp-2">{item.itemDescription}</p> */}
                   </div>
                 </div>
               );

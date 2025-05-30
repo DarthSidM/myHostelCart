@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../middleware/interceptor";
 import socket from "../lib/socket";
 
-export default function ChatWindow({ selectedChat, currentUserId }) {
+export default function ChatWindow({ selectedChat, currentUserId, setRefreshChats }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [error, setError] = useState(null);
+  const messagesEndRef = useRef(null);
 
-  // Fetch messages when chat changes
+  // Scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
     if (!selectedChat?._id) return;
 
@@ -15,6 +20,13 @@ export default function ChatWindow({ selectedChat, currentUserId }) {
       try {
         const res = await api.get(`/chat/messages/${selectedChat._id}`);
         setMessages(res.data);
+
+        await api.patch(`/chat/mark-read/${selectedChat._id}`, {
+          userId: currentUserId,
+        });
+
+        setRefreshChats(prev => !prev);
+        setTimeout(scrollToBottom, 100); // ensure DOM is ready
       } catch (err) {
         console.error("Error fetching messages:", err);
         setError("Failed to load messages.");
@@ -24,28 +36,31 @@ export default function ChatWindow({ selectedChat, currentUserId }) {
     fetchMessages();
   }, [selectedChat?._id]);
 
-  // Join chat room and listen for new messages
   useEffect(() => {
     if (!selectedChat?._id) return;
 
     const chatId = selectedChat._id;
-
-    // Join chat room
     socket.emit("join chat", chatId);
     console.log("📡 Joined chat room:", chatId);
 
-    // Handle new message received
     const handleNewMessage = (newMessage) => {
       if (newMessage.chat._id === chatId) {
         setMessages((prev) => [...prev, newMessage]);
+        scrollToBottom();
+
+        if (newMessage.sender._id !== currentUserId) {
+          api.patch(`/chat/mark-read/${chatId}`, {
+            userId: currentUserId,
+          }).then(() => setRefreshChats(prev => !prev));
+        }
       }
     };
 
     socket.on("message received", handleNewMessage);
 
     return () => {
-      socket.off("message received", handleNewMessage); // clean up listener
-      socket.emit("leave chat", chatId); // leave chat room on unmount
+      socket.off("message received", handleNewMessage);
+      socket.emit("leave chat", chatId);
     };
   }, [selectedChat?._id]);
 
@@ -59,9 +74,10 @@ export default function ChatWindow({ selectedChat, currentUserId }) {
         content: input,
       });
 
-      setMessages((prev) => [...prev, res.data]); // local echo
-      socket.emit("new message", res.data); // emit to server
+      setMessages((prev) => [...prev, res.data]);
+      socket.emit("new message", res.data);
       setInput("");
+      setTimeout(scrollToBottom, 100);
     } catch (err) {
       console.error("Error sending message:", err);
       setError("Failed to send message.");
@@ -81,16 +97,16 @@ export default function ChatWindow({ selectedChat, currentUserId }) {
   }
 
   return (
-    <div className="flex flex-col w-3/4 h-full">
+    <div className="flex flex-col w-3/4 h-full relative bg-gray-50">
       {/* Header */}
-      <div className="bg-white px-6 py-4 shadow-md border-b rounded-t-md">
+      <div className="bg-white px-6 py-4 shadow-sm border-b sticky top-0 z-10">
         <h2 className="text-lg font-semibold text-gray-900">
           {otherUser?.fullName || "Chat"}
         </h2>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-4">
+      <div className="flex-1 p-4 overflow-y-auto space-y-3">
         {messages.map((msg) => (
           <div
             key={msg._id}
@@ -99,30 +115,32 @@ export default function ChatWindow({ selectedChat, currentUserId }) {
             }`}
           >
             <div
-              className={`max-w-xs px-4 py-2 rounded-lg ${
+              className={`max-w-xs px-4 py-2 rounded-2xl shadow-md text-sm ${
                 msg.sender._id === currentUserId
-                  ? "bg-blue-500 text-white rounded-br-none"
-                  : "bg-gray-200 text-gray-900 rounded-bl-none"
+                  ? "bg-blue-600 text-white rounded-br-none"
+                  : "bg-white text-gray-800 rounded-bl-none border"
               }`}
             >
               {msg.content}
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t bg-white flex items-center gap-2">
+      <div className="p-4 bg-gray-200 border-t border-gray-200 sticky bottom-0 z-10 flex gap-2">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type your message..."
-          className="flex-1 border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 border rounded-full px-4 py-2 shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
         <button
           onClick={handleSend}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
         >
           Send
         </button>

@@ -63,6 +63,7 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
       resetForm();
     } catch (err) {
       setError(err.response?.data?.message || "Error adding item");
+      alert("Failed to add item. Please reload site and try again.");
     } finally {
       setUploading(false);
     }
