@@ -15,4 +15,7 @@ router.get("/messages/:chatId", messageController.getAllMessages);
 // Send a message in a chat
 router.post("/message", messageController.sendMessage);
 
+// Mark all messages in a chat as read for a user
+router.patch("/mark-read/:chatId", messageController.markMessagesAsRead);
+
 module.exports = router;

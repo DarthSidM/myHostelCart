@@ -62,3 +62,32 @@ exports.sendMessage = async (req, res) => {
     res.status(500).send("Internal server error");
   }
 };
+
+// Mark all unread messages in a chat as read (for current user)
+exports.markMessagesAsRead = async (req, res) => {
+  const { chatId } = req.params;
+  const { userId } = req.body;
+
+  if (!chatId || !userId) {
+    return res.status(400).json({ error: "chatId and userId are required" });
+  }
+
+  try {
+    const result = await Message.updateMany(
+      {
+        chat: chatId,
+        sender: { $ne: userId },
+        isRead: false,
+      },
+      { $set: { isRead: true } }
+    );
+
+    res.status(200).json({
+      success: true,
+      updatedCount: result.modifiedCount,
+    });
+  } catch (err) {
+    console.error("Failed to mark messages as read:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
