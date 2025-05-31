@@ -9,8 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import getDecodedToken from "../lib/auth";
 
-export function Navbar({ userName, userPhone }) {
+export function Navbar() {
+  const decodedUser = getDecodedToken();
+  const userPhone = decodedUser ? decodedUser.phoneNumber : null;
+  const userName = decodedUser ? decodedUser.fullName : null;
   const navigate = useNavigate();
 
   return (
