@@ -17,7 +17,7 @@ export function Sidebar({ items, onSelectItem, selectedItemId, onAddItem }) {
 
           {/* Items List */}
           <div className="space-y-4">
-            {(items || []).map((item) => {
+            {[...(items || [])].reverse().map((item) => {
               // console.log(item.itemPictures);
               const imageUrl =
                 (item.itemPictures || []).length > 0

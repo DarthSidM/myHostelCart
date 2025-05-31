@@ -19,7 +19,7 @@ export function Navbar({ userName, userPhone }) {
       <div className="flex items-center space-x-6">
         <h1
           className="text-3xl font-extrabold text-gray-900 cursor-pointer hover:text-gray-700 transition"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
         >
           Hostel Cart
         </h1>
