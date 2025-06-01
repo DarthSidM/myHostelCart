@@ -13,10 +13,26 @@ const category = require("./routes/categoryRoute");
 const college = require("./routes/collegeRoute");
 const chatMessage = require("./routes/chatMessage");
 
+const allowedOrigins = [
+  'http://localhost:5173',           // Dev
+  'http://hostelcart.in',            // Production HTTP
+  'https://hostelcart.in'            // Production HTTPS (if using SSL)
+];
+
 // app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
-
+// app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 
 // Prevent JSON parsing for GET requests
 app.use((req, res, next) => {
@@ -52,7 +68,7 @@ const server = app.listen(PORT, () => {
 
 // websocket connection
 const io = new Server(server, {
-  cors: { origin: "http://localhost:5173", credentials: true },
+  cors: { origin: allowedOrigins, credentials: true },
 });
 
 io.on("connection", (socket) => {
