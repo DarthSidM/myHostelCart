@@ -45,7 +45,7 @@ const Register = () => {
 
         try {
             const response = await axios.post(
-                `${import.meta.env.VITE_WEBSOCKET_URL}/user/usersignup`,
+                `${import.meta.env.VITE_API_URL}/user/usersignup`,
                 formData,
                 { withCredentials: true } // To allow cookie-based authentication if needed
             );
