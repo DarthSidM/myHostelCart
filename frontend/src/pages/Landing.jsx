@@ -72,14 +72,17 @@ export default function Landing() {
 
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <Button size="lg" className="text-lg px-8 py-6 shrink-0" asChild>
-                                    <Link to="/signup">
+                                    <Link to="/signup" className="flex items-center">
                                         Get Started <ArrowRight className="ml-2 w-5 h-5" />
                                     </Link>
                                 </Button>
                                 <Button size="lg" variant="outline" className="text-lg px-8 py-6 shrink-0" asChild>
-                                    <Link to="/login">Login</Link>
+                                    <Link to="/login" className="flex items-center">
+                                        Login
+                                    </Link>
                                 </Button>
                             </div>
+
 
 
                             <div className="grid grid-cols-3 gap-4 pt-4">
@@ -317,7 +320,7 @@ export default function Landing() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Button size="lg" variant="secondary" className="text-lg px-8 py-6" asChild>
-                            <Link to="/signup">
+                            <Link to="/signup" className="flex items-center">
                                 Sign Up Now <ArrowRight className="ml-2 w-5 h-5" />
                             </Link>
                         </Button>
@@ -327,9 +330,12 @@ export default function Landing() {
                             className="text-lg px-8 py-6 border-white text-white hover:bg-white hover:text-blue-600"
                             asChild
                         >
-                            <Link to="/login">Login</Link>
+                            <Link to="/login" className="flex items-center">
+                                Login
+                            </Link>
                         </Button>
                     </div>
+
                 </div>
             </section>
 

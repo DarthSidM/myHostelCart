@@ -1,16 +1,48 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { ShoppingCart, Search } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
-
+import api from "../middleware/interceptor";
 export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Filter items based on search query
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [categoryIds, setCategoryIds] = useState([]);
+  const [selectedCategoryName, setSelectedCategoryName] = useState("");
+
+  // Fetch categories from backend
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/category");
+      setCategories(response.data.data || []);
+      setCategoryIds(response.data.categoryIds || []);
+    } catch (err) {
+      setError("Failed to fetch categories");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Filter items based on search query and selected category
   const filteredItems = allItems.filter((item) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    return item.itemName.toLowerCase().includes(query) || item.itemDescription.toLowerCase().includes(query);
+    const matchesSearch =
+      !searchQuery.trim() ||
+      item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.itemDescription.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory = !selectedCategoryName || (() => {
+      const index = categories.indexOf(selectedCategoryName);
+      const correspondingCategoryId = categoryIds[index];
+      return item.itemCategory === correspondingCategoryId;
+    })();
+
+    return matchesSearch && matchesCategory;
   });
 
   return (
@@ -20,15 +52,34 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
         <div className="sticky top-0 z-10 bg-white p-6 rounded-xl shadow-md border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">Explore Items</h2>
 
+          {/* Search & Category Filter */}
           {/* Search Bar */}
-          <div className="relative mt-4">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
-              placeholder="Search items..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 py-3 rounded-md border border-gray-300 bg-gray-100 text-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none"
-            />
+          <div className="mt-4 flex flex-col md:flex-row gap-4 items-stretch">
+            {/* Search Bar */}
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                placeholder="Search items..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 py-3 rounded-md border border-gray-300 bg-gray-100 text-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none w-full"
+              />
+            </div>
+            {/* Category Dropdown */}
+            <div className="w-full md:w-40">
+              <select
+                value={selectedCategoryName}
+                onChange={(e) => setSelectedCategoryName(e.target.value)}
+                className="w-full py-2 px-3 rounded-md border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none"
+              >
+                <option value="">All Categories</option>
+                {categories.map((categoryName, index) => (
+                  <option key={categoryIds[index]} value={categoryName}>
+                    {categoryName}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
