@@ -20,7 +20,7 @@ const Register = () => {
     useEffect(() => {
         const fetchColleges = async () => {
             try {
-                const response = await axios.get("http://localhost:3000/api/v1/college");
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/college`);
                 console.log("Fetched colleges:", response.data); // Debugging log
                 setColleges(Array.isArray(response.data.data) ? response.data.data : []);
             } catch (err) {
@@ -45,7 +45,7 @@ const Register = () => {
 
         try {
             const response = await axios.post(
-                'http://localhost:3000/api/v1/user/usersignup',
+                `${import.meta.env.VITE_WEBSOCKET_URL}/user/usersignup`,
                 formData,
                 { withCredentials: true } // To allow cookie-based authentication if needed
             );
