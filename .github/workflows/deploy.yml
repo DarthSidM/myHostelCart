@@ -21,7 +21,7 @@ jobs:
             set -e  # Exit on any error
 
             echo "🔄 Pulling latest code"
-            cd ~/hostelcart
+            cd ~/myHostelCart
             git pull origin main
 
             echo "🚀 Installing backend dependencies and restarting PM2"
