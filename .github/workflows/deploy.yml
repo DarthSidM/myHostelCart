@@ -1,0 +1,45 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e  # Exit on any error
+
+            echo "🔄 Pulling latest code"
+            cd ~/hostelcart
+            git pull origin main
+
+            echo "🚀 Installing backend dependencies and restarting PM2"
+            cd backend
+            npm install
+            pm2 restart hostelcart_server || pm2 start index.js --name hostelcart_server
+            pm2 save
+
+            echo "⚙️ Building frontend"
+            cd ../frontend
+            npm install
+            npm run build
+
+            echo "📂 Deploying frontend to Nginx directory"
+            sudo rm -rf /var/www/hostelcartHost/*
+            sudo cp -r dist/* /var/www/hostelcartHost/
+
+            echo "🔁 Restarting Nginx"
+            sudo systemctl restart nginx
+
+            echo "✅ Deployment complete"
