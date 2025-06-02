@@ -20,6 +20,9 @@ jobs:
           script: |
             set -e  # Exit on any error
 
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+             
             echo "🔄 Pulling latest code"
             cd ~/myHostelCart
             git pull origin main
