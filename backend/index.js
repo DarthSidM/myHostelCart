@@ -1,3 +1,5 @@
+// the code is created and maintained by Siddharth Maurya or Darth Sid if you steal it, I will fuck you up
+
 const express = require("express");
 const app = express();
 const cors = require("cors");
