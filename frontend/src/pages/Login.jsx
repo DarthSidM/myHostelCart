@@ -2,21 +2,29 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import loginIllustration from '../assets/login.svg'; // Replace with your own image
-
+import ReCAPTCHA from 'react-google-recaptcha';
+const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 const Login = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
 
+    const handleCaptcha = (token) => {
+        setRecaptchaToken(token);
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        if (!recaptchaToken) {
+            setError('Please verify that you are not a robot.');
+            return;
+        }
 
         try {
             const response = await axios.post(
                 `${import.meta.env.VITE_API_URL}/user/userlogin`,
-                { phoneNumber, password },
+                { phoneNumber, password, recaptchaToken },
                 { withCredentials: true }
             );
 
@@ -81,6 +89,10 @@ const Login = () => {
                                 required
                             />
                         </div>
+                        <ReCAPTCHA
+                            sitekey={siteKey}
+                            onChange={handleCaptcha}
+                        />
                         <div>
                             <button
                                 type="submit"

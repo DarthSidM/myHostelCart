@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
+const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,9 +15,13 @@ const Register = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const navigate = useNavigate();
-
+    const [recaptchaToken, setRecaptchaToken] = useState(null); // State to hold reCAPTCHA token
     // Fetch the list of colleges when the component mounts
     const [colleges, setColleges] = useState([]); // Ensure it's initialized as an empty array
+
+    const handleCaptcha = (token) => {
+        setRecaptchaToken(token);
+    };
 
     useEffect(() => {
         const fetchColleges = async () => {
@@ -40,13 +46,16 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        if (!recaptchaToken) {
+            setError('Please verify that you are not a robot.');
+            return;
+        }
         setSuccess('');
 
         try {
             const response = await axios.post(
                 `${import.meta.env.VITE_API_URL}/user/usersignup`,
-                formData,
+                { ...formData, recaptchaToken },
                 { withCredentials: true } // To allow cookie-based authentication if needed
             );
 
@@ -119,7 +128,12 @@ const Register = () => {
                             required
                         />
                     </div>
-
+                    <div className="mt-4">
+                        <ReCAPTCHA
+                            sitekey={siteKey}
+                            onChange={handleCaptcha}
+                        />
+                    </div>
                     <div>
                         <button
                             type="submit"

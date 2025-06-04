@@ -4,14 +4,27 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET, JWT_EXPIRE } = require("../config/appjwt");
 const Role = require("../models/roles");
 const college = require("../models/colleges");
+const axios = require('axios');
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
 
+
+async function verifyRecaptcha(token) {
+  const url = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET_KEY}&response=${token}`;
+  const response = await axios.post(url);
+  return response.data.success;
+}
 
 // Signup Function
 exports.signup = async (req, res) => {
   console.log("sign up endpoint hit")
   try {
-    const { fullName, collegeName, phoneNumber, password } = req.body;
+    const { recaptchaToken, fullName, collegeName, phoneNumber, password } = req.body;
     console.log("Request body:", req.body);
+
+    // Verify reCAPTCHA token
+    if (!recaptchaToken || !(await verifyRecaptcha(recaptchaToken))) {
+      return res.status(400).json({ success: false, message: 'reCAPTCHA verification failed.' });
+    }
 
     // Validate required fields
     if (!fullName || !collegeName || !phoneNumber || !password) {
@@ -94,10 +107,14 @@ exports.signup = async (req, res) => {
 // Login Function
 exports.login = async (req, res) => {
     try {
-      const { phoneNumber, password } = req.body;
+      const { recaptchaToken, phoneNumber, password } = req.body;
   
       console.log("login endpoint hit")
       // Validate required fields
+
+      if (!recaptchaToken || !(await verifyRecaptcha(recaptchaToken))) {
+        return res.status(400).json({ success: false, message: 'reCAPTCHA verification failed.' });
+      }
       if (!phoneNumber || !password) {
         return res.status(400).json({
           message: 'Both email and password are required.',
