@@ -10,7 +10,7 @@ import PublicRoute from "./middleware/PublicRoute";
 import Logout from "./pages/Logout";
 import Chat from "./pages/Chat";
 import Landing from "./pages/Landing";
-
+import VerifyOtp from "./pages/VerifyOtp";
 export default function App() {
   return (
     <Router>
@@ -30,6 +30,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/verify-otp" element={<VerifyOtp />} />
           </Route>
         </Routes>
       </div>

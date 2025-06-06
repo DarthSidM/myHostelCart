@@ -6,13 +6,78 @@ const Role = require("../models/roles");
 const college = require("../models/colleges");
 const axios = require('axios');
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
-
+const TWOFACTOR_API_KEY = process.env.TWOFACTOR_API_KEY;
+const OTP_TEMPLATE_NAME = process.env.TWOFACTOR_TEMPLATE_NAME;
+const { addVerifiedNumber, isVerified, removeVerified } = require("../middleware/verifiedNumbers");
 
 async function verifyRecaptcha(token) {
   const url = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET_KEY}&response=${token}`;
   const response = await axios.post(url);
   return response.data.success;
 }
+
+// Send OTP Function
+exports.sendOTP = async (req, res) => {
+  const { phoneNumber, recaptchaToken } = req.body;
+
+  if (!phoneNumber) {
+    return res.status(400).json({ success: false, message: "Phone number is required." });
+  }
+  if (!recaptchaToken) {
+    return res.status(400).json({ success: false, message: "reCAPTCHA token is missing." });
+  }
+
+  try {
+    // Verify reCAPTCHA token with Google
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`;
+    const recaptchaResponse = await axios.post(verifyUrl);
+    if (!recaptchaResponse.data.success) {
+      return res.status(403).json({ success: false, message: "reCAPTCHA verification failed." });
+    }
+
+    // If captcha verification passed, proceed to send OTP
+    const otpUrl = `https://2factor.in/API/V1/${TWOFACTOR_API_KEY}/SMS/${phoneNumber}/AUTOGEN/${OTP_TEMPLATE_NAME}`;
+    const response = await axios.get(otpUrl);
+
+    if (response.data.Status === "Success") {
+      return res.status(200).json({
+        success: true,
+        sessionId: response.data.Details,
+        message: "OTP sent successfully.",
+      });
+    } else {
+      return res.status(500).json({ success: false, message: "Failed to send OTP." });
+    }
+  } catch (error) {
+    console.error("Error sending OTP:", error.message);
+    return res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
+
+
+exports.verifyOTP = async (req, res) => {
+  const { phoneNumber, otp, sessionId } = req.body;
+
+  if (!phoneNumber || !otp || !sessionId) {
+    return res.status(400).json({ success: false, message: "All fields are required." });
+  }
+
+  try {
+    const verifyUrl = `https://2factor.in/API/V1/${TWOFACTOR_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`;
+    const response = await axios.get(verifyUrl);
+
+    if (response.data.Status === "Success") {
+      addVerifiedNumber(phoneNumber); // ✅ mark phone number as verified
+      return res.status(200).json({ success: true, message: "OTP verified successfully." });
+    } else {
+      return res.status(400).json({ success: false, message: "Invalid OTP." });
+    }
+  } catch (error) {
+    console.error("Error verifying OTP:", error.message);
+    return res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
+
 
 // Signup Function
 exports.signup = async (req, res) => {
@@ -25,7 +90,13 @@ exports.signup = async (req, res) => {
     if (!recaptchaToken || !(await verifyRecaptcha(recaptchaToken))) {
       return res.status(400).json({ success: false, message: 'reCAPTCHA verification failed.' });
     }
-
+    // Check OTP verification
+    if (!isVerified(phoneNumber)) {
+      return res.status(401).json({
+        message: 'Phone number not verified via OTP.',
+        success: false,
+      });
+    }
     // Validate required fields
     if (!fullName || !collegeName || !phoneNumber || !password) {
       return res.status(400).json({
@@ -83,6 +154,8 @@ exports.signup = async (req, res) => {
 
     const result = await User.create(newUser);
 
+    removeVerified(phoneNumber); // ✅ remove phone number from verified list after successful signup
+    
     if (result) {
       return res.status(201).json({
         message: 'User created successfully!',
