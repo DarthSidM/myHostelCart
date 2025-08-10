@@ -283,4 +283,36 @@ exports.deleteItem = async (req, res) => {
 };
 
 
+exports.getAllItems = async (req, res) => {
+    try{
+        const users = await User.find();
+        let items = [];
+        users.forEach(user => {
+            user.item.forEach(item => {
+                items.push({
+                    ...item.toObject(), // Convert Mongoose subdocument to plain object
+                    seller: {
+                        fullName: user.fullName,
+                        phoneNumber: user.phoneNumber,
+                        profile_photo_url: user.profile_photo_url,
+                    },
+                    college: user.college
+                });
+            });
+        });
 
+        return res.status(200).json({
+            message: "Items retrieved successfully",
+            success: true,
+            items: items,
+        });
+    }
+    catch(error){
+        console.error("Error fetching all items:", error);
+        res.status(500).json({
+            message: "Server error",
+            success: false,
+            error: error.message,
+        });
+    }
+}

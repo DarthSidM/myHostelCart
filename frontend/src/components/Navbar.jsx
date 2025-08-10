@@ -17,6 +17,8 @@ export function Navbar() {
   const userName = decodedUser ? decodedUser.fullName : null;
   const navigate = useNavigate();
 
+  const isAuthenticated = !!decodedUser;
+  // const isAuthenticated = true;
   return (
     <nav className="flex items-center justify-between p-4 bg-white/30 backdrop-blur-md border-b shadow-lg sticky top-0 z-50">
       {/* Logo and Navigation */}
@@ -27,23 +29,29 @@ export function Navbar() {
         >
           Hostel Cart
         </h1>
-        <Button
-          variant="ghost"
-          className="text-gray-800 font-medium hover:bg-gray-200 transition px-4 py-2 rounded-lg"
-          onClick={() => navigate("/about")}
-        >
-          About Us
-        </Button>
-        <Button
-          variant="ghost"
-          className="text-gray-800 font-medium hover:bg-gray-200 transition px-4 py-2 rounded-lg"
-          onClick={() => navigate("/contact")}
-        >
-          Contact Us
-        </Button>
+
+        {/* Show About Us & Contact Us only if logged in */}
+        {isAuthenticated && (
+          <>
+            <Button
+              variant="ghost"
+              className="text-gray-800 font-medium hover:bg-gray-200 transition px-4 py-2 rounded-lg"
+              onClick={() => navigate("/about")}
+            >
+              About Us
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-gray-800 font-medium hover:bg-gray-200 transition px-4 py-2 rounded-lg"
+              onClick={() => navigate("/contact")}
+            >
+              Contact Us
+            </Button>
+          </>
+        )}
       </div>
 
-      {/* Chat Icon + Profile Dropdown */}
+      {/* Chat Icon + Login/Signup or Profile */}
       <div className="flex items-center space-x-3">
         <Button
           variant="ghost"
@@ -53,29 +61,48 @@ export function Navbar() {
           <MessageCircle className="w-6 h-6" />
         </Button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="text-gray-900 font-semibold hover:bg-gray-200 transition px-4 py-2 rounded-lg">
-              {userName}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64 bg-white shadow-xl rounded-lg border" align="end" forceMount>
-            <DropdownMenuLabel className="font-semibold text-gray-900 px-4 py-2">
-              <div className="flex flex-col space-y-1">
-                <p className="text-lg">{userName}</p>
-                <p className="text-gray-500 text-sm">📞 {userPhone}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-600"
-              onClick={() => navigate("/logout")}
+        {!isAuthenticated ? (
+          <>
+            <Button
+              variant="ghost"
+              className="text-gray-800 font-medium hover:bg-gray-200 transition px-4 py-2 rounded-lg"
+              onClick={() => navigate("/login")}
             >
-              <LogOut className="h-5 w-5" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              Login
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-gray-800 font-medium hover:bg-gray-200 transition px-4 py-2 rounded-lg"
+              onClick={() => navigate("/signup")}
+            >
+              Signup
+            </Button>
+          </>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="text-gray-900 font-semibold hover:bg-gray-200 transition px-4 py-2 rounded-lg">
+                {userName}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64 bg-white shadow-xl rounded-lg border" align="end" forceMount>
+              <DropdownMenuLabel className="font-semibold text-gray-900 px-4 py-2">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-lg">{userName}</p>
+                  <p className="text-gray-500 text-sm">📞 {userPhone}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-600"
+                onClick={() => navigate("/logout")}
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </nav>
   );
