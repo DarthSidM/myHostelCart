@@ -16,16 +16,18 @@ export default function App() {
     <Router>
       <div className="flex flex-col h-screen">
         <Routes>
-          {/* Protected Routes: Only accessible when logged in */}
+          {/* Public Home */}
+          <Route path="/home" element={<Home />} />
+           <Route path="/chat" element={<><Navbar /><Chat /></>} />
+          {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/home" element={<Home />} />
             <Route path="/about" element={<><Navbar /><About /></>} />
             <Route path="/contact" element={<><Navbar /><Contact /></>} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="/chat" element={<><Navbar /><Chat /></>} />
+           
           </Route>
 
-          {/* Public Routes: Only accessible when NOT logged in */}
+          {/* Public Routes */}
           <Route element={<PublicRoute />}>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
@@ -33,6 +35,7 @@ export default function App() {
             <Route path="/verify-otp" element={<VerifyOtp />} />
           </Route>
         </Routes>
+
       </div>
     </Router>
   );

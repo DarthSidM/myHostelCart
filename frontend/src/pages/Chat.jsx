@@ -1,33 +1,50 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
 import getDecodedToken from "../lib/auth";
 import socket from "../lib/socket";
+import { LoginPromptModal } from "../components/LoginPromptModal";
 
 export default function Chat() {
+  const navigate = useNavigate();
   const decodedUser = getDecodedToken();
-  const [selectedChat, setSelectedChat] = useState(null); // Store full chat object
-  const [refreshChats, setRefreshChats] = useState(false); // State to trigger re-fetching chats
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [refreshChats, setRefreshChats] = useState(false);
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
 
+  const isAuthenticated = !!decodedUser;
+  // const isAuthenticated = true; // Always allow for testing
   useEffect(() => {
-    if (decodedUser?.userId) {
+    if (isAuthenticated && decodedUser?.userId) {
       socket.emit("setup", decodedUser.userId);
+    } else {
+      setIsLoginPromptOpen(true);
     }
-  }, [decodedUser?.userId]);
+  }, [isAuthenticated, decodedUser?.userId]);
 
-  
+  if (!isAuthenticated) {
+    return (
+      <LoginPromptModal
+        isOpen={isLoginPromptOpen}
+        onClose={() => {
+          navigate("/home", { replace: true }); // force redirect
+        }}
+      />
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       <ChatSidebar
         currentUserId={decodedUser.userId}
-        onSelectChat={setSelectedChat} // Pass function to set selected chat
-        refreshFlag={refreshChats}
+        onSelectChat={setSelectedChat}
+        refreshFlag={setRefreshChats}
       />
-
       <ChatWindow
-        selectedChat={selectedChat} // Pass the full chat object
+        selectedChat={selectedChat}
         currentUserId={decodedUser.userId}
-        setRefreshChats={setRefreshChats} // Pass function to trigger re-fetching chats
+        setRefreshChats={setRefreshChats}
       />
     </div>
   );

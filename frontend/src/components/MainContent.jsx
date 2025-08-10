@@ -3,7 +3,13 @@ import { Input } from "./ui/input";
 import { ShoppingCart, Search } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import api from "../middleware/interceptor";
-export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
+
+export function MainContent({ 
+  userItems = [], 
+  allItems = [], 
+  onSelectItem, 
+  isAuthenticated = false // <-- added prop
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -11,7 +17,6 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
   const [categoryIds, setCategoryIds] = useState([]);
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
 
-  // Fetch categories from backend
   const fetchCategories = async () => {
     setLoading(true);
     try {
@@ -29,18 +34,19 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
     fetchCategories();
   }, []);
 
-  // Filter items based on search query and selected category
   const filteredItems = allItems.filter((item) => {
     const matchesSearch =
       !searchQuery.trim() ||
       item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.itemDescription.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesCategory = !selectedCategoryName || (() => {
-      const index = categories.indexOf(selectedCategoryName);
-      const correspondingCategoryId = categoryIds[index];
-      return item.itemCategory === correspondingCategoryId;
-    })();
+    const matchesCategory =
+      !selectedCategoryName ||
+      (() => {
+        const index = categories.indexOf(selectedCategoryName);
+        const correspondingCategoryId = categoryIds[index];
+        return item.itemCategory === correspondingCategoryId;
+      })();
 
     return matchesSearch && matchesCategory;
   });
@@ -52,10 +58,7 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
         <div className="sticky top-0 z-10 bg-white p-6 rounded-xl shadow-md border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">Explore Items</h2>
 
-          {/* Search & Category Filter */}
-          {/* Search Bar */}
           <div className="mt-4 flex flex-col md:flex-row gap-4 items-stretch">
-            {/* Search Bar */}
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
@@ -65,7 +68,7 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
                 className="pl-12 py-3 rounded-md border border-gray-300 bg-gray-100 text-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none w-full"
               />
             </div>
-            {/* Category Dropdown */}
+
             <div className="w-full md:w-40">
               <select
                 value={selectedCategoryName}
@@ -91,7 +94,9 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
               {searchQuery ? "No results found" : "No items available yet"}
             </h3>
             <p className="text-gray-500">
-              {searchQuery ? "Try searching for something else." : "Items will appear here once listed."}
+              {searchQuery
+                ? "Try searching for something else."
+                : "Items will appear here once listed."}
             </p>
           </div>
         ) : (
@@ -104,7 +109,11 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
               >
                 <div className="relative overflow-hidden rounded-t-lg">
                   <img
-                    src={buyItem.itemPictures?.[0] ? buyItem.itemPictures[0] : "/placeholder.svg"}
+                    src={
+                      buyItem.itemPictures?.[0]
+                        ? buyItem.itemPictures[0]
+                        : "/placeholder.svg"
+                    }
                     alt={buyItem.itemName}
                     className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
                   />
@@ -113,8 +122,19 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-semibold text-lg text-gray-900">{buyItem.itemName}</h3>
-                  <p className="text-sm text-gray-600 line-clamp-2">{buyItem.itemDescription}</p>
+                  <h3 className="font-semibold text-lg text-gray-900">
+                    {buyItem.itemName}
+                  </h3>
+                  <p className="text-sm text-gray-600 line-clamp-2">
+                    {buyItem.itemDescription}
+                  </p>
+
+                  {/* Show college if not authenticated */}
+                  {!isAuthenticated && buyItem.college && (
+                    <p className="text-xs mt-2 text-blue-600 font-medium">
+                      {buyItem.college}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -124,4 +144,3 @@ export function MainContent({ userItems = [], allItems = [], onSelectItem }) {
     </ScrollArea>
   );
 }
-
