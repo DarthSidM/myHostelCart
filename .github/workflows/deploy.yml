@@ -1,11 +1,15 @@
 name: Deploy to Azure
 
 on:
-  push:
-    branches: [main]
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
 
 jobs:
   deploy:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'dev'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -18,7 +22,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            set -e  # Exit on any error
+            set -e
 
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
