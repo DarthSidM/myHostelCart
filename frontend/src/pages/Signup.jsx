@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
+
 const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-// ...imports remain the same
 const Register = () => {
     const [formData, setFormData] = useState({
         fullName: '',
@@ -56,7 +56,6 @@ const Register = () => {
             });
 
             if (response.data.success) {
-                console.log("Navigating with:", formData, response.data.sessionId);
                 navigate('/verify-otp', {
                     state: {
                         formData,
@@ -130,12 +129,19 @@ const Register = () => {
                     <div className="mt-4">
                         <ReCAPTCHA sitekey={siteKey} onChange={handleCaptcha} />
                     </div>
-                    <div>
+                    <div className="space-y-3">
                         <button
                             type="submit"
                             className="w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
                         >
                             Get OTP
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/')}
+                            className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                        >
+                            Back
                         </button>
                     </div>
                 </form>

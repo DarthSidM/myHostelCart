@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import loginIllustration from '../assets/login.svg'; // Replace with your own image
+import loginIllustration from '../assets/login.svg';
 import ReCAPTCHA from 'react-google-recaptcha';
+
 const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
 const Login = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
@@ -14,6 +16,7 @@ const Login = () => {
     const handleCaptcha = (token) => {
         setRecaptchaToken(token);
     };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!recaptchaToken) {
@@ -53,12 +56,18 @@ const Login = () => {
 
                 {/* Form section */}
                 <div className="w-full md:w-1/2 p-8 space-y-6">
-                    <h2 className="text-3xl font-bold text-blue-800 text-center">Login</h2>
+                   <div className="flex justify-center items-center">
+                        <h2 className="text-3xl font-bold text-blue-800 text-center">
+                            Login
+                        </h2>
+                    </div>
+
                     {error && (
                         <div className="bg-red-100 text-red-700 p-3 rounded text-sm">
                             {error}
                         </div>
                     )}
+
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
@@ -75,6 +84,7 @@ const Login = () => {
                                 required
                             />
                         </div>
+
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                 Password
@@ -89,10 +99,12 @@ const Login = () => {
                                 required
                             />
                         </div>
+
                         <ReCAPTCHA
                             sitekey={siteKey}
                             onChange={handleCaptcha}
                         />
+
                         <div>
                             <button
                                 type="submit"
@@ -101,6 +113,13 @@ const Login = () => {
                                 Login
                             </button>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/')}
+                            className="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                        >
+                            Back
+                        </button>
 
                         <div className="text-center mt-4">
                             <span className="text-gray-600">New user? </span>
@@ -112,6 +131,7 @@ const Login = () => {
                                 Sign Up
                             </button>
                         </div>
+
                     </form>
                 </div>
             </div>

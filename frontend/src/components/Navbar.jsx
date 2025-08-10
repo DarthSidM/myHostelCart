@@ -66,6 +66,13 @@ export function Navbar() {
             <Button
               variant="ghost"
               className="text-gray-800 font-medium hover:bg-gray-200 transition px-4 py-2 rounded-lg"
+              onClick={() => navigate("/")}
+            >
+              Back
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-gray-800 font-medium hover:bg-gray-200 transition px-4 py-2 rounded-lg"
               onClick={() => navigate("/login")}
             >
               Login
@@ -78,7 +85,7 @@ export function Navbar() {
               Signup
             </Button>
           </>
-        ) : (
+        ): (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-gray-900 font-semibold hover:bg-gray-200 transition px-4 py-2 rounded-lg">

@@ -59,34 +59,55 @@ const Home = () => {
     const fetchItems = async () => {
       try {
         if (isAuth) {
-          const decoded = currentUser ?? getDecodedToken();
-          if (!decoded?.userId) {
+            const decoded = currentUser ?? getDecodedToken();
+            if (!decoded?.userId) {
             setUserItems([]);
             setOtherItems([]);
             return;
-          }
+            }
 
-          const [myRes, otherRes] = await Promise.all([
-            api.get(`/user/get-my-items?userId=${decoded.userId}`, { withCredentials: true }),
-            api.get(`/user/get-other-items?collegeId=${decoded.college}&userId=${decoded.userId}`, { withCredentials: true }),
-          ]);
+            // Fetch my items
+            try {
+            const myRes = await api.get(`/user/get-my-items?userId=${decoded.userId}`, { withCredentials: true });
+            if (mounted) {
+                setUserItems(myRes?.data?.success ? myRes.data.items : []);
+            }
+            } catch (err) {
+            console.error("Error fetching my items:", err.response?.data?.message || err.message || err);
+            if (mounted) setUserItems([]);
+            }
 
-          if (!mounted) return;
-          setUserItems(myRes?.data?.success ? myRes.data.items : []);
-          setOtherItems(otherRes?.data?.success ? otherRes.data.items : []);
+            // Fetch other items
+            try {
+            const otherRes = await api.get(`/user/get-other-items?collegeId=${decoded.college}&userId=${decoded.userId}`, { withCredentials: true });
+            if (mounted) {
+                setOtherItems(otherRes?.data?.success ? otherRes.data.items : []);
+            }
+            } catch (err) {
+            console.error("Error fetching other items:", err.response?.data?.message || err.message || err);
+            if (mounted) setOtherItems([]);
+            }
+
         } else {
-          const res = await api.get(`/user/get-all-items`);
-          if (!mounted) return;
-          setOtherItems(res?.data?.success ? res.data.items : []);
-          setUserItems([]);
+            // Unauthenticated users → fetch all items
+            try {
+            const res = await api.get(`/user/get-all-items`);
+            if (mounted) {
+                setOtherItems(res?.data?.success ? res.data.items : []);
+                setUserItems([]);
+            }
+            } catch (err) {
+            console.error("Error fetching all items:", err.response?.data?.message || err.message || err);
+            if (mounted) {
+                setOtherItems([]);
+                setUserItems([]);
+            }
+            }
         }
-      } catch (err) {
-        console.error("Error fetching items:", err.response?.data?.message || err.message || err);
-        if (!isAuth) {
-          setOtherItems([]);
-          setUserItems([]);
+        } catch (err) {
+        console.error("Unexpected error:", err.message || err);
         }
-      }
+
     };
 
     fetchItems();
@@ -129,10 +150,12 @@ const Home = () => {
         )}
 
         <MainContent
-          currentUserId={currentUser?.userId}
-          allItems={otherItems}
-          onSelectItem={(item) => handleSelectItem(item, false)}
+            currentUserId={currentUser?.userId}
+            allItems={otherItems}
+            onSelectItem={(item) => handleSelectItem(item, false)}
+            isAuth={isAuth} // pass this new prop
         />
+
       </div>
 
       <AddItemModal

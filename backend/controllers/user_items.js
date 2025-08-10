@@ -287,19 +287,23 @@ exports.getAllItems = async (req, res) => {
     try{
         const users = await User.find();
         let items = [];
-        users.forEach(user => {
+        await Promise.all(users.map(async (user) => {
+            const collegeName = await College.findById(user.college)
+                .then(college => college ? college.collegeName : "Unknown College");
+
             user.item.forEach(item => {
                 items.push({
-                    ...item.toObject(), // Convert Mongoose subdocument to plain object
+                    ...item.toObject(),
                     seller: {
                         fullName: user.fullName,
                         phoneNumber: user.phoneNumber,
                         profile_photo_url: user.profile_photo_url,
                     },
-                    college: user.college
+                    college: collegeName
                 });
             });
-        });
+        }));
+
 
         return res.status(200).json({
             message: "Items retrieved successfully",
