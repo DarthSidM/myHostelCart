@@ -18,7 +18,8 @@ const chatMessage = require("./routes/chatMessage");
 const allowedOrigins = [
   'http://localhost:5173',           // Dev
   'http://hostelcart.in',            // Production HTTP
-  'https://hostelcart.in'            // Production HTTPS (if using SSL)
+  'https://hostelcart.in',            // Production HTTPS (if using SSL)
+  'https://www.hostelcart.in'
 ];
 
 // app.use(express.json());
